@@ -10,7 +10,14 @@
 	// imaginary symbol
 	//private final String IMAGINARY = "I";
 
-
+  function rad2deg(angle) {
+    return angle*180/Math.PI;
+  }
+  
+  function deg2rad(angle) {
+    return angle*Math.PI/180;
+  }
+  
   function isFunction(item) {
     return functions.indexOf(item) != -1 ? true : false;
   }
@@ -40,6 +47,27 @@
       return 1;
     }
     return 2;
+  }
+  
+  function execOperation(token, a, b) {
+    a = parseFloat(a);
+    b = parseFloat(b);
+    if(token == "*") {
+        return a*b;
+    } else if (token == "/") {
+        return a/b;
+    } else if (token == "+") {
+      return a+b;
+    } else if (token == "-") {
+      return a-b;
+    }
+  }
+  
+  function execFunction(token, a) {
+    a = parseFloat(a);
+    if(token == "sin") {
+      return Math.sin(deg2rad(a));
+    }
   }
   
   function tokenize(str) {
@@ -87,11 +115,12 @@
       },
       
       parse: function(str) {
-        str = str || "2+45+728*7+30-98+3+(-4)*88";
+        str = str || "2+45+728*7+30+sin(30)-98+3+(-4)*88";
         console.log(str);
+        //console.log(eval(str));
         str = prepareString(str);
         str = tokenize(str);
-        console.log(str);
+
 
         
         for (var i = 0; i < str.length; i++) {
@@ -105,7 +134,7 @@
               stackNumbers.push(stackOperations.pop());
             }
             stackOperations.pop();
-            while(stackOperations.length != 0 && !isFunction(stackOperations[stackOperations.length-1])) {
+            while(stackOperations.length != 0 && isFunction(stackOperations[stackOperations.length-1])) {
               stackNumbers.push(stackOperations.pop());
             }
           } else if (isNumber(item)) {
@@ -119,18 +148,34 @@
               }
               stackOperations.push(item);
           } else if (isFunction(item)) {
-            
+            stackOperations.push(item);
           }
           
-
           
         }
 
         while (stackOperations.length != 0) {
           stackNumbers.push(stackOperations.pop());
         }
-        console.log(stackNumbers);
-        console.log(stackOperations);
+        
+        var res = 0;
+        var i = 0;
+        while (i <= stackNumbers.length) {
+          console.log(stackNumbers);
+          if(isOperator(stackNumbers[i])) {
+            var val = execOperation(stackNumbers[i], stackNumbers[i-2], stackNumbers[i-1]);
+            stackNumbers.splice(i-2, 3, val);
+            i = 0;
+          } else if (isFunction(stackNumbers[i])) {
+            var val = execFunction(stackNumbers[i], stackNumbers[i-1]);
+            stackNumbers.splice(i-1, 2, val);
+            i = 0;
+          }
+          i++;
+        }
+        console.log(res);
+        //console.log(stackNumbers);
+        //console.log(stackOperations);
       }
 
     };
